@@ -20,20 +20,27 @@ def parse(xml_file):
     observables = Observables.from_obj(observables_obj) # convert binding object into python-cybox object
     return observables
 
+def parseString(xml):
+    observables_obj = cybox_core_binding.parseString(xml) # create binding object from xml string
+    observables = Observables.from_obj(observables_obj) # to python-cybox object
+    return observables
+
 def main():
     if len(sys.argv) != 2:
         print "[!] Please provide an xml file" 
         exit(1)
     
-    xml_file = sys.argv[-1]
-    observables = parse(xml_file) 
+    #xml_file = sys.argv[-1]
+    xml = sys.argv[-1]
+    #observables = parse(xml_file) 
+    observables = parseString(xml)
     #print observables.to_dict() # example to_dict() call on returned object
     ob_dict = observables.to_dict()
     print json.dumps(ob_dict) #print json
     ob_json = json.dumps(ob_dict)
-    es_index = es.post('cybox/data',data=ob_json)
-    print es_index
+    #es_index = es.post('cybox/data',data=ob_json)
+    #print es_index
+
 
 if __name__ == "__main__":
     main()
-
