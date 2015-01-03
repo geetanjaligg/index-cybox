@@ -30,16 +30,29 @@ def main():
         print "[!] Please provide an xml file" 
         exit(1)
     
+    print 'HELLLLLLLLLLLOOOOOOOOOOO'
     #xml_file = sys.argv[-1]
     xml = sys.argv[-1]
     #observables = parse(xml_file) 
     observables = parseString(xml)
     #print observables.to_dict() # example to_dict() call on returned object
     ob_dict = observables.to_dict()
-    print json.dumps(ob_dict) #print json
+    #print json.dumps(ob_dict) #print json
+    properties = ob_dict['observables'][0]['object']['properties']
+    del ob_dict['observables'][0]['object']['properties']
+    ob_dict['observables'][0]['object']['properties'] = {}
+    ob_dict['observables'][0]['object']['properties']['properties'] = properties
+    ob_dict['observables'][0]['object']['properties']['type'] = 'nested'
     ob_json = json.dumps(ob_dict)
-    #es_index = es.post('cybox/data',data=ob_json)
-    #print es_index
+    #print ob_json
+    try:
+        es_index = es.post('cybox/data',data=ob_json)
+        print es_index
+    except Exception, e:
+        print e        
+        pass
+    
+    
 
 
 if __name__ == "__main__":
