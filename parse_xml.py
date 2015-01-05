@@ -36,6 +36,30 @@ def parseString(xml):
     observables = Observables.from_obj(observables_obj) # to python-cybox object
     return observables
 
+def mapping():
+    #default mapping so that it'll index xml without any mapping exception
+    with open("out.json") as json_file:
+        json_data = json.load(json_file)
+        print(json_data)
+        try:
+            es_index = es.post('cybox/data',data=ob_json)
+            print es_index
+        except Exception, e:
+            print e        
+            pass
+
+def create():
+    print 'create'
+    with open("/home/ubuntu/cybox-parser/out.json") as json_file:
+        json_data = json.load(json_file)
+        try:
+            es_index = es.post('cybox/data',data=json_data)
+            print es_index
+        except Exception, e:
+            print e        
+            pass
+    return
+
 def main():
     if len(sys.argv) != 2:
         print "[!] Please provide an xml file" 
@@ -45,15 +69,20 @@ def main():
     observables = parseString(xml)
     ob_dict = observables.to_dict()
     #print "length of observables   " + str(len(ob_dict['observables']))
-    if(len(ob_dict['observables'])>1):
-        for i,val in enumerate(ob_dict['observables']):
-            if('object' in ob_dict['observables'][i]):
-                flat_ob_dict = flatten(ob_dict['observables'][i]['object']['properties'])    
-                ob_dict['observables'][i]['object']['properties'] = flat_ob_dict
 
-    elif('object' in ob_dict['observables'][0]):
-        flat_ob_dict = flatten(ob_dict['observables'][0]['object']['properties'])    
-        ob_dict['observables'][0]['object']['properties'] = flat_ob_dict
+    #check for empty index
+    try:
+        print 'check'
+        es_count = es.get('cybox/data/_search', data={
+                        'query' : {
+                                    'match_all' : {}
+                                }
+                        })
+    except Exception, e:
+        print e.result
+        if e.result['error'] == "IndexMissingException[[cybox] missing]":
+            create()
+            pass
     
     ob_json = json.dumps(ob_dict)
     #print ob_json
