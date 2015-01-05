@@ -73,7 +73,6 @@ def main():
     #check for empty index
     try:
         print 'check'
-        es_count = es.get('cybox/data/_search', data={
                         'query' : {
                                     'match_all' : {}
                                 }
