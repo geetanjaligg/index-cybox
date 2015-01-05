@@ -36,28 +36,58 @@ def parseString(xml):
     observables = Observables.from_obj(observables_obj) # to python-cybox object
     return observables
 
-def mapping():
-    #default mapping so that it'll index xml without any mapping exception
-    with open("out.json") as json_file:
+def mapping1():
+    # mapping type 1 so that it'll index xml without any mapping exception
+    with open("/home/ubuntu/cybox-parser/data1.json") as json_file:
         json_data = json.load(json_file)
         print(json_data)
         try:
-            es_index = es.post('cybox/data',data=ob_json)
-            print es_index
+            es_map = es.post('cybox/_mapping/data',data=json_data)
+            print es_map
         except Exception, e:
             print e        
             pass
+    return
+
+def mapping2():
+    # mapping type 2 so that it'll index xml without any mapping exception
+    with open("/home/ubuntu/cybox-parser/data2.json") as json_file:
+        json_data = json.load(json_file)
+        print(json_data)
+        try:
+            es_map = es.post('cybox/_mapping/data2',data=json_data)
+            print es_map
+        except Exception, e:
+            print e        
+            pass
+    return
+
+def mapping3():
+    # mapping type 2 so that it'll index xml without any mapping exception
+    with open("/home/ubuntu/cybox-parser/data3.json") as json_file:
+        json_data = json.load(json_file)
+        print(json_data)
+        try:
+            es_map = es.post('cybox/_mapping/data3',data=json_data)
+            print es_map
+        except Exception, e:
+            print e        
+            pass
+    return
 
 def create():
-    print 'create'
-    with open("/home/ubuntu/cybox-parser/out.json") as json_file:
-        json_data = json.load(json_file)
-        try:
-            es_index = es.post('cybox/data',data=json_data)
-            print es_index
-        except Exception, e:
-            print e        
-            pass
+    print 'create index and disable dynamic mapping'
+    #with open("/home/ubuntu/cybox-parser/data.json") as json_file:
+    json_data = '{"index.mapper.dynamic": false}'
+    try:
+        es_disable = es.put('cybox',data=json_data)
+        print es_disable
+        mapping1()
+        mapping2()
+        mapping3()
+    except Exception, e:
+        print e        
+        pass
     return
 
 def main():
@@ -72,13 +102,12 @@ def main():
 
     #check for empty index
     try:
-        print 'check'
-                        'query' : {
+        es_count = es.get('cybox/_search', data={
+                       'query' : {
                                     'match_all' : {}
                                 }
                         })
     except Exception, e:
-        print e.result
         if e.result['error'] == "IndexMissingException[[cybox] missing]":
             create()
             pass
@@ -86,10 +115,28 @@ def main():
     ob_json = json.dumps(ob_dict)
     #print ob_json
     try:
-        es_index = es.post('cybox/data',data=ob_json)
+        es_index = es.post('cybox/data1',data=ob_json)
+        print '1 try'
         print es_index
     except Exception, e:
-        print e        
+        #print e 
+        if e.result['status'] == 400:
+            try:
+                es_index = es.post('cybox/data2',data=ob_json)
+                print '2 try'
+                print es_index                   
+            except Exception, e:
+                #print e
+                if e.result['status'] == 400:
+                    try:
+                        es_index = es.post('cybox/data3',data=ob_json)
+                        print '3 try'
+                        print es_index                   
+                    except Exception, e:
+                        #print e
+                        print '3 exception'
+                        pass
+                pass
         pass
     
     
