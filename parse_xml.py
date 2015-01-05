@@ -13,6 +13,7 @@ from  cybox.core import Observables
 import json
 import rawes
 import collections
+from bson import json_util
 
 es = rawes.Elastic('http://localhost:9200')
 
@@ -112,7 +113,7 @@ def main():
             create()
             pass
     
-    ob_json = json.dumps(ob_dict)
+    ob_json = json.dumps(ob_dict,default=json_util.default)
     try:
         es_index = es.post('cybox/data1',data=ob_json)
     except Exception, e:
