@@ -42,7 +42,7 @@ def mapping1():
         json_data = json.load(json_file)
         print(json_data)
         try:
-            es_map = es.post('cybox/_mapping/data',data=json_data)
+            es_map = es.post('cybox/_mapping/data1',data=json_data)
             print es_map
         except Exception, e:
             print e        
@@ -113,28 +113,21 @@ def main():
             pass
     
     ob_json = json.dumps(ob_dict)
-    #print ob_json
     try:
         es_index = es.post('cybox/data1',data=ob_json)
-        print '1 try'
-        print es_index
     except Exception, e:
-        #print e 
-        if e.result['status'] == 400:
+        if e.result['status'] == 400 or e.result['status'] == 404:
             try:
                 es_index = es.post('cybox/data2',data=ob_json)
-                print '2 try'
-                print es_index                   
             except Exception, e:
-                #print e
-                if e.result['status'] == 400:
+                if e.result['status'] == 400 or e.result['status'] == 404:
                     try:
                         es_index = es.post('cybox/data3',data=ob_json)
-                        print '3 try'
-                        print es_index                   
                     except Exception, e:
-                        #print e
-                        print '3 exception'
+                        print e
+                        f = open( '/home/ubuntu/cybox-parser/exception.json', 'w' )
+                        f.write(ob_json)
+                        f.close()
                         pass
                 pass
         pass
